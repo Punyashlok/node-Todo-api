@@ -21,16 +21,16 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp',(err, client) => {
     const db = client.db('TodoApp');
 
     //delete Many
-    // db.collection('Todos').deleteMany({text:'Eat dinner'}).then((result) => {
-    //     console.log(result);
-    // });
+    db.collection('Users').deleteMany({Name:'Sukanta kr. Dash'}).then((result) => {
+        console.log(result);
+    });
 
     // delete One
     // db.collection('Todos').deleteOne({text:'Walk the dog'}).then((result) => {
     //     console.log(result);
     // });
 
-    db.collection('Todos').findOneAndDelete({completed:false}).then((result) => {
+    db.collection('Users').findOneAndDelete({_id: new ObjectID('5ab71a8ff5bdd9084b603177')}).then((result) => {
         console.log(result);
     });
 
