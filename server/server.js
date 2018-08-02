@@ -1,3 +1,4 @@
+
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -36,7 +37,18 @@ app.post('/todos', (req,res) => {
     });
 });
 
+app.get('/todos', (req,res) => {
 
+    Todo.find().then((todos) => {  //FInds all docs inside collection 'Todo'
+        res.send({
+            todos
+            //code: 'asdf' use object formats to send todos array instead of directly sending array.
+            // Helps for more flexibility, like tacking on a code etc
+        });
+    }, (e) => {
+            res.status(400).send(e);
+    })
+});
 
 app.listen('4000', () => {
     console.log('Started on port: 4000');
