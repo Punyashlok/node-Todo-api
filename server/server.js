@@ -5,7 +5,7 @@ var bodyParser = require('body-parser');
 var {mongoose} = require('./db/mongoose.js');
 var {Todo} = require('./models/todo.js');
 var {user} = require('./models/user.js');
-
+const {ObjectID} = require('mongodb');
 /*
 var item1 = new Todo({
     text: 'Eat Lunch'
@@ -47,6 +47,32 @@ app.get('/todos', (req,res) => {
         });
     }, (e) => {
             res.status(400).send(e);
+    });
+});
+
+//GET /todos/1234 i.e. Get a specific todos
+
+app.get('/todos/:id', (req,res) => {
+
+    //res.send(req.params);
+    var id = req.params.id;
+
+    if(!ObjectID.isValid(id))
+    {
+       return res.status(404).send('Invalid ID');
+    }
+
+    Todo.findById(id).then((todo) => {
+        if(!todo)
+        {
+            res.status(404).send({message: 'NO such ID present in DB'});
+        }
+
+        res.status(200).send({todo}); // {todo, code: 'Success'}
+
+    }).catch((e) => {
+        console.log(e);
+        res.status(400).send({});
     });
 });
 
