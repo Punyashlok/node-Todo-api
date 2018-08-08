@@ -1,14 +1,24 @@
 
+// This is set up using scripts to run. Defined in package.json file
+
+// ********************************   USE npm run test-watch  ******************************************** //
+
+
 const expect = require('expect');
 const request = require('supertest');
-
+const {ObjectID} = require('mongodb');
 const {app} = require('./../server.js');
 const {Todo} = require('./../models/todo.js');
 
 const todos = [{
+    _id: new ObjectID() ,
     text: 'First Test todos'
 }, {
+    _id: new ObjectID() ,
     text: 'Second Test todos'
+},{
+    _id: new ObjectID() ,
+     text:'Third Test todos'
 }];
 
 
@@ -65,7 +75,7 @@ describe('POST /todos', () => {
                }
 
                Todo.find().then((todos) => {
-                   expect(todos.length).toBe(2); // beforeEach should clear the db before this testCase
+                   expect(todos.length).toBe(3); // beforeEach should clear the db before this testCase
                    done();
                 }).catch((e) => done(e));
             });
@@ -79,10 +89,42 @@ describe('GET /todos', () => {
          .get('/todos')
          .expect(200)
          .expect((res) => {
-             expect(res.body.todos.length).toBe(2);
+             expect(res.body.todos.length).toBe(3);
          })
          .end((err,res) => {
              done(err);
          });
  });
+});
+
+
+describe('GET /todos/:id', () => {
+
+    it('should return a todo doc', (done) => {
+
+        request(app)
+            .get(`/todos/${todos[2]._id.toHexString()}`) //USE template Strings `
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.text).toBe(todos[2].text); // You need to use 'todo' here as In server.js you are sending 'todo' instead of 'todos' in "Todo.findById(id).then((todo)"
+            })
+            .end(done);
+    });
+
+    it('should return a 404 error if todo not found', (done) => {
+       // var hexId = new ObjectID().toHexString();
+        request(app)
+            .get(`/todos/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('should return 404 for non ObjectIDs', (done) => {
+
+        var objID = '123';
+        request(app)
+            .get(`/todos/${objID}`)
+            .expect(404)
+            .end(done);
+    });
 });
