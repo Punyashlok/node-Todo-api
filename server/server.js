@@ -1,11 +1,13 @@
 
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
+const lodash = require('lodash');
 
 var {mongoose} = require('./db/mongoose.js');
 var {Todo} = require('./models/todo.js');
 var {user} = require('./models/user.js');
 const {ObjectID} = require('mongodb');
+
 /*
 var item1 = new Todo({
     text: 'Eat Lunch'
@@ -99,6 +101,36 @@ app.delete('/todos/:id', (req, res) => {
         console.log(e);
         res.status(400).send({});
     });
+});
+
+app.patch('/todos/:id',(req, res) => {
+    var id = req.params.id;
+    var body = lodash.pick(req.body, ['text','completed']);
+
+    if(!ObjectID.isValid(id))
+    {
+        return res.status(404).send('Invalid ID');
+    }
+
+    if(lodash.isBoolean(body.completed) && body.completed) //if completed property is a boolean and true
+    {
+        body.completedAt = new Date().getTime(); //Setting JS timeStamp
+    }else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+
+    Todo.findByIdAndUpdate(id,{$set:body}, {new: true}).then((todo) => {
+
+        if(!todo) //Null case
+        {
+            res.status(404).send({message: 'NO such ID present in DB'});
+        }
+        res.status(200).send({todo});
+
+    }).catch((e) => {
+        res.status(400).send();
+    } );
 });
 
 app.listen(port, () => {
